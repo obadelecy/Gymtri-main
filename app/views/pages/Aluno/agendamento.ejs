@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus agendamentos</title>
+    <link rel="stylesheet" href="/css/styleInterface.css">
+</head>
+<body>
+    <header>
+        <a href="/interfaces/interfaceUsuario"><img src="/public/img/logoPng3.png" alt="Logo Gymtri" width="80px"></a>
+        <nav id="menu">
+            <ul>
+                <li><a href="/aluno/buscarProfissional" class="navConfig">Buscar Profissional</a></li>
+                <li><a href="/aluno/buscarAcademia" class="navConfig">Buscar Academias</a></li>
+                <li><a href="/Produtos/indexprodutos" class="navConfig" target="_blank">Produtos</a></li>
+                <li><a href="/aluno/editarDados" class="navConfig">Editar Dados</a></li>
+                <li><a href="/index" class="navConfig">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="title">
+            <h1>Consulte seus agendamentos</h1>
+        </section>
+        
+        <section id="blockConsultUser" class="consult">
+            <% if (agendamentos && agendamentos.length > 0) { %>
+                <% agendamentos.forEach((agendamento, index) => { %>
+                    <section id="item<%= index + 1 %>" class="itemConsult">
+                        <h4><%= agendamento.tipo %></h4>
+                        <p><span>Profissional:</span> <%= agendamento.profissional %></p>
+                        <p><span>Data:</span> <%= agendamento.data %></p>
+                        <p><span>Horário:</span> <%= agendamento.horario %></p>
+                        <section id="btnConsult">
+                            <button class="btnConfig">Ir para Consulta</button>
+                            <button class="btnConfig" type="button">Remarcar</button>
+                            <button class="btnConfig" type="button">Cancelar</button>
+                        </section>
+                    </section>
+                <% }); %>
+            <% } else { %>
+                <section id="item3" class="notConsult">
+                    <h4>Não há mais agendamentos.</h4>
+                    <section id="btnAgendar">
+                        <a href="/aluno/novoAgendamento"><button class="btnConfig">Novo agendamento</button></a>
+                    </section>
+                </section>
+            <% } %>
+        </section>
+    </main>
+  </body>
+</html>

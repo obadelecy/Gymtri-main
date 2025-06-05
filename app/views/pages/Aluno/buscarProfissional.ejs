@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscar profissional</title>
+    <link rel="stylesheet" href="/public/css/styleInterface.css">
+</head>
+<body>
+    <header>
+        <a href="/views/pages/interfaces/interfaceUsuario"><img src="/public/img/logoPng3.png" alt="Logo Gymtri" width="80px"></a>
+        <nav id="menu">
+            <ul>
+                <li><a href="/views/pages/Aluno/buscarProfissional" class="navConfig">Buscar Profissional</a></li>
+                <li><a href="/views/pages/Aluno/buscarAcademia" class="navConfig">Buscar Academias</a></li>
+                <li><a href="/views/pages/Produtos/indexprodutos" class="navConfig" target="_blank">Produtos</a></li>
+                <li><a href="/views/pages/Aluno/editarDados" class="navConfig">Editar Dados</a></li>
+                <li><a href="/views/pages/index" class="navConfig">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="title">
+            <h1>Buscar profissional</h1>
+        </section>
+
+        <form action="/buscar-profissional" method="GET">
+            <section>
+                <label class="labelAgend" for="area">Digite o nome ou Registro profissional</label>
+                <input type="text" name="search" id="nameOrRegister" placeholder="Nome ou registro do profissional. Ex: CRM">
+            </section>
+            <section class="btnAgend">
+                <button class="btnConfig" type="submit">Buscar profissional</button>
+            </section>
+        </form>
+
+        <% if (profissionais && profissionais.length > 0) { %>
+            <section class="resultados">
+                <% profissionais.forEach(profissional => { %>
+                    <div class="resultado-profissional">
+                        <h3><%= profissional.nome %></h3>
+                        <p>Especialidade: <%= profissional.especialidade %></p>
+                        <p>Registro: <%= profissional.registro %></p>
+                        <button onclick="verDetalhes('<%= profissional.id %>')">Ver detalhes</button>
+                    </div>
+                <% }); %>
+            </section>
+        <% } %>
+    </main>
+</body>
+</html>
