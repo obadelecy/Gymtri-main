@@ -1,11 +1,15 @@
 const express = require("express");
 const session = require("express-session");
+const flash = require("connect-flash");
 const path = require('path');
 const dotenv = require("dotenv");
 
+const app = express();
+
 dotenv.config();
 
-const app = express();
+// Initialize flash
+app.use(flash());
 
 // Sessão
 app.use(session({

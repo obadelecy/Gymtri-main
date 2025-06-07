@@ -1,0 +1,67 @@
+<%- include('../partials/header') %>
+
+<main class="container">
+    <section class="title">
+        <h1>Remarcar Agendamento</h1>
+    </section>
+
+    <% if (errors && errors.length > 0) { %>
+        <div class="alert alert-danger">
+            <ul>
+                <% errors.forEach(error => { %>
+                    <li><%= error.msg %></li>
+                <% }) %>
+            </ul>
+        </div>
+    <% } %>
+
+    <form action="/aluno/agendamentos/<%= agendamento.PROTOCOLO %>/editar" method="POST" class="form-agendamento">
+        <div class="form-group">
+            <label for="area">Especialidade</label>
+            <select name="area" id="area" class="form-control" required>
+                <option value="null">Selecione uma especialidade</option>
+                <% if (agendamento.tipo) { %>
+                    <option value="<%= agendamento.tipo %>" selected><%= agendamento.tipo %></option>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="professional">Profissional</label>
+            <select name="professional" id="professional" class="form-control" required>
+                <option value="null">Selecione um profissional</option>
+                <% if (agendamento.profissional) { %>
+                    <option value="<%= agendamento.profissional %>" selected><%= agendamento.profissional %></option>
+                <% } %>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="date">Data</label>
+            <input type="date" name="date" id="date" class="form-control" 
+                   value="<%= agendamento.DATA_AGENDAMENTO %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="time">Horário</label>
+            <input type="time" name="time" id="time" class="form-control" 
+                   value="<%= agendamento.HORARIO %>" required>
+        </div>
+
+        <div class="form-group">
+            <label for="reason">Motivo</label>
+            <textarea name="reason" id="reason" class="form-control" rows="3" required>
+                <% if (agendamento.motivo) { %>
+                    <%= agendamento.motivo %>
+                <% } %>
+            </textarea>
+        </div>
+
+        <div class="form-buttons">
+            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            <a href="/aluno/agendamentos" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</main>
+
+<%- include('../partials/footer') %>

@@ -21,4 +21,11 @@ router.get('/agendamentos', agendamentosController.listarAgendamentos);
 router.get('/agendamentos/novo', agendamentosController.novoAgendamento);
 router.post('/agendamentos', agendamentosController.criarAgendamento);
 
+// Rotas para editar agendamento
+router.get('/agendamentos/:id/editar', verificarUsuAutenticado, agendamentosController.editarAgendamento);
+router.post('/agendamentos/:id/editar', verificarUsuAutenticado, agendamentosController.atualizarAgendamento);
+
+// Rota para cancelar agendamento
+router.post('/agendamentos/:id/cancelar', verificarUsuAutenticado, agendamentosController.cancelarAgendamento);
+
 module.exports = router;

@@ -35,9 +35,9 @@
                             <p><span>Data:</span> <%= agendamento.data %></p>
                             <p><span>Horário:</span> <%= agendamento.horario %></p>
                             <section id="btnConsult">
-                                <button class="btnConfig" onclick="irParaConsulta('<%= agendamento.protocolo %>')">Ir para Consulta</button>
-                                <button class="btnConfig" onclick="remarcarAgendamento('<%= agendamento.protocolo %>')">Remarcar</button>
-                                <button class="btnConfig" onclick="cancelarAgendamento('<%= agendamento.protocolo %>')">Cancelar</button>
+                                <button class="btnConfig" onclick="irParaConsulta('<%= agendamento.protocolo %>')">Ir para atendimento</button>
+                                <button class="btnConfig" onclick="remarcarAgendamento('<%= agendamento.protocolo %>')">Remarcar agendamento</button>
+                                <button class="btnConfig" onclick="cancelarAgendamento('<%= agendamento.protocolo %>')">Cancelar agendamento</button>
                             </section>
                         </section>
                     <% } %>
@@ -54,5 +54,42 @@
             <a href="/aluno/novoAgendamento"><button class="btnConfig">Novo agendamento</button></a>
         </section>
     </main>
+    <script>
+        function irParaConsulta(protocolo) {
+            // Abrir link do Zoom em uma nova aba
+            window.open(`https://zoom.us/j/${protocolo}`, '_blank');
+        }
+
+        function remarcarAgendamento(id) {
+            // Redirecionar para a página de edição do agendamento
+            window.location.href = `/aluno/agendamentos/${id}/editar`;
+        }
+
+        function cancelarAgendamento(id) {
+            // Exibir confirmação antes de cancelar
+            const confirmacao = confirm("Tem certeza que deseja cancelar este agendamento?");
+            if (confirmacao) {
+                // Fazer requisição para cancelar o agendamento
+                fetch(`/aluno/agendamentos/${id}/cancelar`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Atualizar a página após o cancelamento bem-sucedido
+                        window.location.reload();
+                    } else {
+                        throw new Error('Erro ao cancelar agendamento');
+                    }
+                })
+                .catch(error => {
+                    alert('Erro ao cancelar agendamento. Por favor, tente novamente.');
+                    console.error('Erro:', error);
+                });
+            }
+        }
+    </script>
   </body>
 </html>
