@@ -10,42 +10,100 @@ const { createPool } = require("mysql2");
 const profisController = {
   cadastrarProfis: async (req, res) => {
     try {
-      const {
-        fullname,
-        emailRegister,
-        passwordRegister,
-        numberRegister,    
-        cpfRegister,
-        profession,
-        numberDoc
-    } = req.body;
- 
-    if (!fullname || !emailRegister || !passwordRegister || !numberRegister) {
-      return res.status(400).send("Todos os campos são obrigatórios.");
+        // Log detalhado dos dados recebidos
+        console.log('Dados recebidos no controller:', req.body);
+        
+        // Verificar se o corpo da requisição existe
+        if (!req.body) {
+            return res.status(400).json({
+                success: false,
+                errors: [
+                    { msg: "Corpo da requisição vazio." }
+                ]
+            });
+        }
+
+        // Extração segura dos dados
+        const dados = {
+            fullname: req.body.fullname || '',
+            emailRegister: req.body.emailRegister || '',
+            passwordRegister: req.body.passwordRegister || '',
+            passwordRegisterConfirm: req.body.passwordRegisterConfirm || '',
+            numberRegister: req.body.numberRegister || '',
+            numberDoc: req.body.numberDoc || '',
+            profession: req.body.profession || '',
+            profissionalReg: req.body.profissionalReg || ''
+        };
+
+        // Validar se todos os campos obrigatórios existem e não estão vazios
+        const camposObrigatorios = ['fullname', 'emailRegister', 'passwordRegister', 'numberRegister', 'numberDoc'];
+        const erros = camposObrigatorios.map(campo => {
+            if (!dados[campo] || dados[campo].trim() === '') {
+                return `Campo ${campo} é obrigatório.`;
+            }
+            return null;
+        }).filter(erro => erro !== null);
+
+        if (erros.length > 0) {
+            return res.status(400).json({
+                success: false,
+                errors: erros
+            });
+        }
+
+        // Validar confirmação de senha
+        if (dados.passwordRegister !== dados.passwordRegisterConfirm) {
+            return res.status(400).json({
+                success: false,
+                errors: [
+                    { msg: "As senhas não coincidem." }
+                ]
+            });
+        }
+
+        // Verificar se o email já existe
+        const [existingProfis] = await profisModel.findProfisByEmail(dados.emailRegister);
+        if (existingProfis && existingProfis.length > 0) {
+            return res.status(400).json({
+                success: false,
+                errors: [
+                    { msg: "Este e-mail já está cadastrado." }
+                ]
+            });
+        }
+
+        // Criptografar senha
+        const senhaCriptografada = bcrypt.hashSync(dados.passwordRegister, salt);
+
+        // Montar objeto com dados do profissional
+        const novoProfis = {
+            NOME: dados.fullname,
+            NUMERO_DOC: dados.numberDoc,
+            EMAIL: dados.emailRegister,
+            SENHA: senhaCriptografada,
+            TELEFONE: dados.numberRegister,
+            CPF_PROF: dados.numberDoc, // Usando o mesmo número do documento como CPF_PROF
+            PROFISSAO: dados.profession,
+            REGISTRO_PROFISSIONAL: dados.profissionalReg
+        };
+
+        console.log("✅ Profissional pronto para ser salvo:", novoProfis);
+
+        // Salvar no banco
+        await profisModel.create(novoProfis);
+
+        // Redirecionar para a página de login
+        return res.redirect('/login');
+
+    } catch (err) {
+        console.error("Erro ao cadastrar Profissional:", err);
+        return res.status(500).json({
+            success: false,
+            errors: [
+                { msg: "Erro interno no servidor." }
+            ]
+        });
     }
- 
-    const senhaCriptografada = bcrypt.hashSync(passwordRegister, salt);
-    console.log(numberDoc);
-    const novoProfis = {
-      NOME: fullname,
-      NUMERO_DOC: numberDoc,
-      EMAIL: emailRegister,
-      SENHA: senhaCriptografada,
-      TELEFONE: numberRegister,
-      CPF_PROF: cpfRegister,
-      PROFISSAO: profession,
-    };
- 
-    console.log("✅ Profissional pronto para ser salvo:", novoProfis);
-    let insert = await profisModel.create(novoProfis)
- 
-    // aqui entraremos com o banco (veja abaixo)
- 
-    res.status(201).send("Profissional cadastrado com sucesso!");
-  } catch (err) {
-    console.error("Erro ao cadastrar Profissional:", err);
-    res.status(500).send("Erro interno no servidor");
-  }
 },
  
  

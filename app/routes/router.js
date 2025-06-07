@@ -6,7 +6,7 @@ module.exports = function(application) {
   const alunoController = require("../controllers/alunoController");
   const academiaController = require("../controllers/academiaController");
   const profisController = require("../controllers/profisController");
-  const agendamentosController = require("../controllers/agendamentosController")();
+  const agendamentosController = require("../controllers/agendamentosController");
 
   const {
     verificarUsuAutenticado,

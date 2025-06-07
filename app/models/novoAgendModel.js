@@ -39,25 +39,80 @@ module.exports = {
 
     create: async (dadosForm) => {
         try {
+            // Garantir que os dados estão no formato correto
+            const protocolo = Math.floor(Date.now() / 1000);
+            const valores = [
+                dadosForm.NUMERO_DOC,     // NUMERO_DOC
+                dadosForm.DURACAO,       // DURACAO
+                dadosForm.HORARIO,       // HORARIO
+                dadosForm.DATA_AGENDAMENTO, // DATA_AGENDAMENTO
+                1 // STATUS
+            ];
+
             const [resultados] = await pool.query(
-                'INSERT INTO AGENDAMENTOS (NUMERO_DOC, DURACAO, HORARIO, DATA_AGENDAMENTO, STATUS) VALUES (?, ?, ?, ?, 1)',
-                [dadosForm]
+                'INSERT INTO AGENDAMENTOS (NUMERO_DOC, DURACAO, HORARIO, DATA_AGENDAMENTO, STATUS) VALUES (?, ?, ?, ?, ?)',
+                valores
             );
             return resultados;
         } catch (error) {
-            console.log(error);
+            console.error('Erro ao criar agendamento:', {
+                error,
+                message: error.message,
+                stack: error.stack
+            });
             return null;
         }
     },
 
-    findProfissionais: async () => {
+    findProfissionais: async (especialidade) => {
         try {
-            const [resultados] = await pool.query(
-                'SELECT id, nome FROM profissionais WHERE status = "ativo" ORDER BY nome'
-            );
-            return resultados;
+            // Validação do parâmetro
+            if (!especialidade || typeof especialidade !== 'string') {
+                console.warn('Especialidade inválida:', especialidade);
+                return [];
+            }
+
+            // Prepara a string para busca flexível
+            const especialidadeBusca = String(especialidade)
+                .toLowerCase()
+                .trim()
+                .replace(/\s+/g, ' ');
+
+            // Logs detalhados
+            // Logs removidos para evitar poluição do console com dados brutos
+            // console.log('Query completa:', { ... });
+
+            // Query SQL mais flexível
+            const query = `
+                SELECT NUMERO_DOC as id, NOME as nome, PROFISSAO as profissao 
+                FROM PROFISSIONAIS 
+                WHERE 
+                    -- Busca exata (case-insensitive)
+                    LOWER(PROFISSAO) = LOWER(?)
+                    -- Busca contém (case-insensitive)
+                    OR LOWER(PROFISSAO) LIKE CONCAT('%', LOWER(?), '%')
+                    -- Busca início (case-insensitive)
+                    OR LOWER(PROFISSAO) LIKE CONCAT(LOWER(?), '%')
+                    -- Busca fim (case-insensitive)
+                    OR LOWER(PROFISSAO) LIKE CONCAT('%', LOWER(?))
+                ORDER BY NOME
+            `;
+
+            console.log('Query SQL:', query);
+            console.log('Parâmetro usado na query:', especialidadeBusca);
+            
+            // Usa especialidadeBusca que foi corretamente definida
+            const [resultados] = await pool.query(query, [especialidadeBusca, especialidadeBusca, especialidadeBusca, especialidadeBusca]);
+            
+            // Logs removidos para evitar poluição do console com dados brutos
+            // console.log('Profissionais encontrados:', resultados);
+            return resultados || [];
         } catch (error) {
-            console.error('Erro ao buscar profissionais:', error);
+            console.error('Erro ao buscar profissionais:', {
+                error,
+                message: error.message,
+                stack: error.stack
+            });
             return [];
         }
     },

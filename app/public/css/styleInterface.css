@@ -163,6 +163,29 @@ main {
     border: 0px;
     text-align: center;
     margin: 6em 0;
+    padding: 2em;
+}
+
+#btnAgendar {
+    display: flex;
+    justify-content: center;
+    margin-top: 2em;
+}
+
+#btnAgendar button {
+    background-color: #00BFAE;
+    border: 1px solid #607D8B;
+    border-radius: 1em;
+    color: #ffffff;
+    padding: 0.8em 2em;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#btnAgendar button:hover {
+    background-color: #607D8B;
+    border: 1px solid #607D8B;
 }
 
 .consult #item3 h4 {

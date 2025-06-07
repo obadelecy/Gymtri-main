@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/alunoController');
+const agendamentosController = require('../controllers/agendamentosController');
+const { verificarUsuAutenticado } = require('../models/autenticador_middleware');
 
+// Rota para buscar profissionais por especialidade
+router.get('/api/profissionais', verificarUsuAutenticado, agendamentosController.getProfissionais);
 // Rota para exibir o formulário (opcional, se quiser usar GET)
 /*
 router.get('/cadastro', (req, res) => {
@@ -11,5 +15,10 @@ router.get('/cadastro', (req, res) => {
 
 // Rota para processar o formulário do aluno
 router.post('/aluno', usuarioController.cadastrarAluno);
+
+// Rotas de agendamentos
+router.get('/agendamentos', agendamentosController.listarAgendamentos);
+router.get('/agendamentos/novo', agendamentosController.novoAgendamento);
+router.post('/agendamentos', agendamentosController.criarAgendamento);
 
 module.exports = router;

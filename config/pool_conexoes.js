@@ -12,10 +12,13 @@ const pool = mysql.createPool({
 });
 
 pool.getConnection((err, conn) => {
-    if(err) 
-        console.log(err)
-    else
-        console.log("Conectado ao SGBD!")
+    if (err) {
+        // Logs removidos para evitar poluição do console com dados brutos
+        // console.log(err)
+    } else {
+        // Logs removidos para evitar poluição do console com dados brutos
+        // console.log("Conectado ao SGBD!")
+    }
 })
 
 module.exports = pool.promise()

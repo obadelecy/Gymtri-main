@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -92,6 +93,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <a href="/interfaces/interfaceUsuario"><img src="/public/img/logoPng3.png" alt="Logo Gymtri" width="80px"></a>
@@ -111,49 +113,199 @@
             <h1>Novo agendamento</h1>
         </section>
 
-        <form id="newAgend" method="POST" action="/create-agend">
+        <form id="newAgend" method="POST" action="/aluno/agendamentos">
             <section>
                 <label class="labelAgend" for="area">Especialidade</label>
-                <select name="area" id="area">
+                <select name="area" id="area" onchange="atualizarProfissionais(this.value)">
                     <option value="">Selecione a especialidade</option>
-                    <option value="nutricionista">Nutricionista</option>
-                    <option value="personal">Personal Trainer</option>
+                    <option value="Personal Trainer">Personal Trainer</option>
+                    <option value="Nutricionista">Nutricionista</option>
                 </select>
             </section>
-            
+
             <section>
                 <label class="labelAgend" for="professional">Profissional</label>
                 <select name="professional" id="professional">
                     <option value="">Selecione o profissional</option>
-                    <% if (typeof profissionais !== 'undefined' && Array.isArray(profissionais)) { %>
-                        <% profissionais.forEach(profissional => { %>
-                            <option value="<%= profissional.id %>"><%= profissional.nome %></option>
-                        <% }); %>
-                    <% } %>
                 </select>
             </section>
-            
+
+            <script>
+                // Função para atualizar o select de profissionais
+                async function atualizarProfissionais(especialidade) {
+                    try {
+                        console.log('Buscando profissionais para especialidade:', especialidade);
+                        const response = await fetch(`/aluno/api/profissionais?especialidade=${especialidade}`);
+                        
+                        if (!response.ok) {
+                            throw new Error(`Erro HTTP: ${response.status}`);
+                        }
+                        
+                        const profissionais = await response.json();
+                        console.log('Profissionais recebidos:', profissionais);
+
+                        // Verificar se a resposta é um array válido
+                        if (!Array.isArray(profissionais)) {
+                            throw new Error('Resposta inválida do servidor - não é um array');
+                        }
+
+                        const select = document.getElementById('professional');
+                        select.innerHTML = '<option value="">Selecione o profissional</option>';
+
+                        // Verificar se há profissionais para mostrar
+                        if (profissionais.length > 0) {
+                            profissionais.forEach(profissional => {
+                                // Verificar se o profissional tem os campos necessários
+                                if (profissional.id && profissional.nome) {
+                                    const option = document.createElement('option');
+                                    option.value = String(profissional.id); // Usar id (NUMERO_DOC) como value
+                                    option.textContent = profissional.nome; // Usar nome para exibição
+                                    select.appendChild(option);
+                                }
+                            });
+                        } else {
+                            console.log('Nenhum profissional encontrado para a especialidade:', especialidade);
+                        }
+                    } catch (error) {
+                        console.error('Erro ao buscar profissionais:', error);
+                        alert('Erro ao carregar profissionais. Por favor, tente novamente.');
+                        // Adicionar opção de erro
+                        const select = document.getElementById('professional');
+                        select.innerHTML = '<option value="">Erro ao carregar profissionais</option>';
+                    }
+                }
+
+                // Atualiza os profissionais quando a especialidade muda
+                document.getElementById('area').addEventListener('change', function () {
+                    const especialidade = this.value;
+                    if (especialidade) {
+                        atualizarProfissionais(especialidade);
+                    } else {
+                        document.getElementById('professional').innerHTML = '<option value="">Selecione o profissional</option>';
+                    }
+                });
+
+                // Carrega os profissionais iniciais se já houver uma especialidade selecionada
+                const especialidadeInicial = document.getElementById('area').value;
+                if (especialidadeInicial) {
+                    atualizarProfissionais(especialidadeInicial);
+                }
+            </script>
+
             <section>
                 <label class="labelAgend" for="date">Data</label>
                 <input type="date" name="date" id="date" value="<%= date || '' %>">
-                <section id="dateHelp" class="form-text"><%= dateError || '' %></section>
+                <section id="dateHelp" class="form-text">
+                    <%= dateError || '' %>
+                </section>
             </section>
-            
+
             <section>
                 <label class="labelAgend" for="hours">Horário</label>
                 <input type="time" name="time" id="time" value="<%= time || '' %>">
-                <section id="timeHelp" class="form-text"><%= timeError || '' %></section>
+                <section id="timeHelp" class="form-text">
+                    <%= timeError || '' %>
+                </section>
             </section>
-            
-            <section>
+
+            <!-- <section>
                 <label class="labelAgend" for="reason">Descrição</label>
                 <textarea name="reason" id="reason" placeholder="Descreva resumidamente o motivo da consulta"><%= descricao || '' %></textarea>
-            </section>
-            
+            </section> -->
+
             <section class="btnAgend">
-                <button class="btnConfig" type="submit">Confirmar agendamento</button>
+                <button class="btnConfig" type="submit" id="submitBtn">Confirmar agendamento</button>
+                <div id="loading" style="display: none;">
+                    <img src="/public/img/loading.gif" alt="Carregando..." style="width: 30px;">
+                </div>
             </section>
+
+            <script>
+                document.getElementById('newAgend').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    // Validar campos obrigatórios
+                    const select = document.getElementById('professional');
+                    const selectedValue = select.value;
+                    
+                    if (!selectedValue || selectedValue === '') {
+                        alert('Por favor, selecione um profissional antes de continuar.');
+                        return;
+                    }
+
+                    // Mostrar loading
+                    document.getElementById('submitBtn').style.display = 'none';
+                    document.getElementById('loading').style.display = 'inline-block';
+
+                    try {
+                        // Converte FormData para objeto
+                        const formData = new FormData(e.target);
+                        const data = {};
+                        formData.forEach((value, key) => {
+                            // Garantir que professional seja uma string válida
+                            if (key === 'professional') {
+                                data[key] = String(value).trim();
+                            } else {
+                                data[key] = value;
+                            }
+                        });
+
+                        // Validar se professional está preenchido antes de enviar
+                        if (!data.professional || data.professional === '') {
+                            throw new Error('Número do profissional não foi preenchido corretamente');
+                        }
+
+                        // Log detalhado dos dados
+                        console.log('Dados enviados:', {
+                            area: data.area,
+                            professional: data.professional,
+                            date: data.date,
+                            time: data.time
+                        });
+
+                        const apiResponse = await fetch('/aluno/agendamentos', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        });
+
+                        const apiResult = await apiResponse.json();
+                        console.log('Resposta do servidor:', apiResult);
+
+                        // Verificar status da resposta
+                        if (!apiResponse.ok) {
+                            throw new Error(apiResult.message || 'Erro ao processar o agendamento');
+                        }
+
+                        if (apiResult.success) {
+                            // Redirecionar após sucesso
+                            window.location.href = apiResult.redirect;
+                        } else {
+                            // Mostrar erro detalhado
+                            if (apiResult.errors) {
+                                let errorMsg = 'Erros encontrados:\n';
+                                apiResult.errors.forEach(error => {
+                                    errorMsg += `• ${error.msg}\n`;
+                                });
+                                alert(errorMsg);
+                            } else {
+                                alert(apiResult.message || 'Erro ao processar o agendamento.');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Erro:', error);
+                        alert('Erro ao processar o agendamento. Por favor, tente novamente.');
+                    } finally {
+                        // Restaurar botão
+                        document.getElementById('submitBtn').style.display = 'block';
+                        document.getElementById('loading').style.display = 'none';
+                    }
+                });
+            </script>
         </form>
     </main>
 </body>
+
 </html>

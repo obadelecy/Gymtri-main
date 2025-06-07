@@ -27,20 +27,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ROTAS
-const rotaPrincipal = require("./app/routes/router")(); // <- Certifique-se que o caminho está certo
+const rotaPrincipal = require("./app/routes/router")();
 app.use("/", rotaPrincipal);
 
-// View engine
-//app.set('view engine', 'ejs');
-//app.set('views', path.join(__dirname, 'views'));
-
-// Rotas
-// const alunoRoutes = require('./app/routes/aluno');
-// app.use('/', alunoRoutes);
-
-
-
-
+// Rotas do aluno
+const alunoRoutes = require('./app/routes/aluno');
+app.use('/aluno', alunoRoutes);
 
 app.listen(process.env.APP_PORT || 3000, () => {
     console.log(`Servidor rodando em http://localhost:${process.env.APP_PORT || 3000}`);
